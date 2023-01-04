@@ -70,30 +70,6 @@
       margin-bottom: 10px;
       padding: 0 15px;
     }
-    
-    /* .login-box .dropdown {
-      position: relative;
-    }
-    .login-box .dropdown .dropdown-menu {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      z-index: 1;
-      display: none;
-      flex-direction: column;
-      background-color: #333;
-      border-radius: 4px;
-    }
-    .login-box .dropdown:hover .dropdown-menu {
-      display: flex;
-    }
-    .login-box .dropdown-menu a {
-      padding: 10px 20px;
-      white-space: nowrap;
-    }
-    .login-box .dropdown-menu a:hover {
-      background-color: #444;
-    } */
   </style>
 </head>
 
@@ -152,10 +128,28 @@
       <br>
       <div class="row">
         <div>
-          <label id="listLabel" for="titles">b. Enter items to read: </label>
+          <!-- <label id="listLabel" for="titles">b. Enter items to read: </label>
           <textarea id="titles" name="titles" rows="5" cols="42">
             Leaves of Grass
-            RDF 1.1 Primer</textarea>
+            RDF 1.1 Primer</textarea> -->
+
+            <label id="timeLabel" for="time">b. Enter current time: </label>
+            <textarea id="time" name="time" rows="5" cols="42">
+              04-01-2022
+            </textarea>
+
+            <label id="temperatureLabel" for="temps">b. Enter temperature: </label>
+            <textarea id="temps" name="temps" rows="5" cols="42">
+              14
+            </textarea>
+
+            <label id="latitudeLongitudeLabel" for="latLon">b. Enter Latitude and Longitude: </label>
+            <textarea id="latLon" name="latLon" rows="5" cols="42">
+              51.470,-2.5946
+            </textarea>
+
+
+
             <button name="btnCreate" id="btnCreate">Create</button>
           </div>
           <br>

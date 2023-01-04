@@ -21,7 +21,7 @@ import {
     setThing
   } from "@inrupt/solid-client";
   
-  import { SCHEMA_INRUPT, RDF, AS, OWL, OM } from "@inrupt/vocab-common-rdf";
+  import { SCHEMA_INRUPT, RDF, AS, OWL, OM, GEO } from "@inrupt/vocab-common-rdf";
   
   const selectorIdP = document.querySelector("#select-idp");
   const selectorPod = document.querySelector("#select-pod");
@@ -70,6 +70,7 @@ import {
   async function getMyPods() {
     const webID = document.getElementById("myWebID").value;
     const mypods = await getPodUrlAll(webID, { fetch: fetch });
+    
   
     // Update the page with the retrieved values.
   
@@ -89,9 +90,13 @@ import {
     // For simplicity and brevity, this tutorial hardcodes the  SolidDataset URL.
     // In practice, you should add in your profile a link to this resource
     // such that applications can follow to find your list.
-    const readingListUrl = `${SELECTED_POD}getting-started/sensor-data/data02`;
+    // const readingListUrl = `${SELECTED_POD}getting-started-/reading-List/my-List`;
+    const readingListUrl = `${SELECTED_POD}dosing-data/tank01`;
   
-    let titles = document.getElementById("titles").value.split("\n");
+    //let titles = document.getElementById("titles").value.split("\n");
+    let time = document.getElementById("time").value.split("\n");
+    let temps = document.getElementById("temps").value.split("\n");
+    let latLon = document.getElementById("latLon").value.split("\n");
   
     // Fetch or create a new reading list.
     let myReadingList;
@@ -112,18 +117,38 @@ import {
         console.error(error.message);
       }
     }
+
+
+    let item = createThing({ name: "temp" + time });
+    item = addUrl(item, RDF.type, 'http://www.w3.org/ns/sosa/Sensor');
+    item = addStringNoLocale(item, SCHEMA_INRUPT.value, temps);
+    item = addStringNoLocale(item, SCHEMA_INRUPT.dateModified, time);
+    item = addStringNoLocale(item, 'http://www.w3.org/2003/01/geo/wgs84_pos/lat_lon', latLon);
+    myReadingList = setThing(myReadingList, item);
+
   
     // Add titles to the Dataset
-    let i = 0;
-    titles.forEach((title) => {
-      if (title.trim() !== "") {
-        let item = createThing({ name: "title" + i });
-        item = addUrl(item, RDF.type, AS.Article);
-        item = addStringNoLocale(item, SCHEMA_INRUPT.value, title);
-        myReadingList = setThing(myReadingList, item);
-        i++;
-      }
-    });
+    // let i = 0;
+    // titles.forEach((title) => {
+    //   if (title.trim() !== "") {
+    //     let item = createThing({ name: "title" + i });
+    //     item = addUrl(item, RDF.type, AS.Article);
+    //     item = addStringNoLocale(item, SCHEMA_INRUPT.value, title);
+    //     myReadingList = setThing(myReadingList, item);
+    //     i++;
+    //   }
+    // });
+
+    // let i = 0;
+    // temps.forEach((temp) => {
+    //   if (temp.trim() !== "") {
+    //     let item = createThing({ name: "temp" + i });
+    //     item = addUrl(item, RDF.type, 'http://www.w3.org/ns/sosa/Sensor');
+    //     item = addStringNoLocale(item, SCHEMA_INRUPT.value, temp);
+    //     myReadingList = setThing(myReadingList, item);
+    //     i++;
+    //   }
+    // });
   
     try {
       // Save the SolidDataset
