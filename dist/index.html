@@ -6,9 +6,9 @@
   <title>IoT Device Manager</title>
   <script defer src="./index.js"></script>
   <link rel="stylesheet" href="my-demo.css" />
-
-
-   <style>
+  
+  
+  <style>
     
     .login-box {
       width: 400px;
@@ -60,7 +60,7 @@
       color: #666;
       text-decoration: none;
     }
-
+    
     .section{
       width: 100%;
       height: 44px;
@@ -69,6 +69,35 @@
       border-radius: 4px;
       margin-bottom: 10px;
       padding: 0 15px;
+    }
+
+    body {
+      font-family: sans-serif;
+    }
+    form {
+      width: 500px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    input[type="text-tank"], input[type="number-tank"] {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin: 8px 0;
+      padding: 12px 20px;
+    }
+    input[type="submit-tank"] {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 8px 0;
+      padding: 12px 20px;
+    }
+    input[type="submit-tank"]:hover {
+      background-color: #45a049;
     }
   </style>
 </head>
@@ -129,50 +158,83 @@
       <div class="row">
         <div>
           <!-- <label id="listLabel" for="titles">b. Enter items to read: </label>
-          <textarea id="titles" name="titles" rows="5" cols="42">
-            Leaves of Grass
-            RDF 1.1 Primer</textarea> -->
-
-            <label id="timeLabel" for="time">b. Enter current time: </label>
-            <textarea id="time" name="time" rows="5" cols="42">
-              04-01-2022
-            </textarea>
-
-            <label id="temperatureLabel" for="temps">b. Enter temperature: </label>
-            <textarea id="temps" name="temps" rows="5" cols="42">
-              14
-            </textarea>
-
-            <label id="latitudeLongitudeLabel" for="latLon">b. Enter Latitude and Longitude: </label>
-            <textarea id="latLon" name="latLon" rows="5" cols="42">
-              51.470,-2.5946
-            </textarea>
-
-
-
-            <button name="btnCreate" id="btnCreate">Create</button>
+            <textarea id="titles" name="titles" rows="5" cols="42">
+              Leaves of Grass
+              RDF 1.1 Primer</textarea> -->
+              
+              <!-- <label id="selectedTankLabel" for="select-tank">Select Tank Number </label>
+                <textarea id="select-tank" name="select-tank" rows="5" cols="42">
+                  tank03
+                </textarea> -->
+                
+                
+                <label id="selectedTankLabel" for="select-tank">Please Select the Tank</label>
+                <select id="select-tank" name="select-tank">
+                  <option value="">--Please select the tank--</option>
+                  <!-- Update the select-idp option if not using PodSpaces -->
+                  
+                  <option value="tank01">Tank 01</option>
+                  <option value="tank02">Tank 02</option>
+                  <option value="tank03">Tank 03</option>
+                  <option value="tank04">Tank 04</option>
+                  
+                  
+                </select>
+                <label id="timeLabel" for="time">b. Enter current time: </label>
+                <textarea id="time" name="time" rows="5" cols="42">
+                  04-01-2022
+                </textarea>
+                
+                <label id="temperatureLabel" for="temps">b. Enter temperature: </label>
+                <textarea id="temps" name="temps" rows="5" cols="42">
+                  14
+                </textarea>
+                
+                <label id="latitudeLongitudeLabel" for="latLon">b. Enter Latitude and Longitude: </label>
+                <textarea id="latLon" name="latLon" rows="5" cols="42">
+                  51.470,-2.5946
+                </textarea>
+                
+                
+                
+                <button name="btnCreate" id="btnCreate">Create</button>
+              </div>
+              <br>
+            </div>
           </div>
-          <br>
-        </div>
-      </div>
-      <div id="results" class="panel">
-        <div class="row">
-          <label>Create Reading List Status</label>
-          <span id="labelCreateStatus"></span>
-        </div>
-        <div class="row">
-          <div>
-            <label id="labelRetrieved" for="savedtitles">Retrieved to validate::</label>
-            <textarea id="savedtitles" name="savedtitles" rows="5" cols="42" disabled></textarea>
+          <div id="results" class="panel">
+            <div class="row">
+              <label>Create Reading List Status</label>
+              <span id="labelCreateStatus"></span>
+            </div>
+            <div class="row">
+              <div>
+                <label id="labelRetrieved" for="savedtitles">Retrieved to validate::</label>
+                <textarea id="savedtitles" name="savedtitles" rows="5" cols="42" disabled></textarea>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-
-  </body>
-  
-  </html>
-  
-  
-  
-  
+        
+        <!-- Add New Tank -->
+        <div id="new-tank" class="new-tank" style="display:show">
+          <h1>Create a New Device</h1>
+          <!-- <form action="/create-device" method="post"> -->
+          
+            <label for="tank-name">Name:</label><br>
+            <input type="text-tank" id="tank-name" name="tank-name"><br>
+            <label for="tank-manager">Tank Manager:</label><br>
+            <input type="text-tank" id="tank-manager" name="tank-manager"><br>
+            <label for="tank-viewers">Tank Viewers:</label><br>
+            <input type="text-tank" id="tank-viewers" name="tank-viewers"><br>
+            <!-- <input type="submit-tank" value="Create"> -->
+            <button name="submit-tank" id="submit-tank">Add New Tank</button>
+          
+        </div>
+      </body>
+      
+      </html>
+      
+      
+      
+      

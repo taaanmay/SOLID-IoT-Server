@@ -29,8 +29,6 @@ import {
   const buttonRead = document.querySelector("#btnRead");
   const buttonCreate = document.querySelector("#btnCreate");
   const labelCreateStatus = document.querySelector("#labelCreateStatus");
-
-  const buttonCreateNewTank = document.querySelector("#submit-tank");
   
   buttonRead.setAttribute("disabled", "disabled");
   buttonLogin.setAttribute("disabled", "disabled");
@@ -88,19 +86,27 @@ import {
   async function createList() {
     labelCreateStatus.textContent = "";
     const SELECTED_POD = document.getElementById("select-pod").value;
+    //const SELECTED_TANK = document.getElementById("select-tank").value;
+    // let SELECTED_TANK = document.getElementById("select-tank").value.split("\n").trim();
+
     let SELECTED_TANK = document.getElementById("select-tank").value;
-    SELECTED_TANK = 'tank01';
-  
+
+
+
     // For simplicity and brevity, this tutorial hardcodes the  SolidDataset URL.
     // In practice, you should add in your profile a link to this resource
     // such that applications can follow to find your list.
     // const readingListUrl = `${SELECTED_POD}getting-started-/reading-List/my-List`;
-    const readingListUrl = `${SELECTED_POD}dosing-data/${SELECTED_TANK}`;
+    const readingListUrl = `${SELECTED_POD}dosing-data/tank05`;
   
+    // const readingListUrl = `${SELECTED_POD}dosing-data/${SELECTED_TANK}`;
+    console.log(readingListUrl)
+
     //let titles = document.getElementById("titles").value.split("\n");
     let time = document.getElementById("time").value.split("\n");
     let temps = document.getElementById("temps").value.split("\n");
     let latLon = document.getElementById("latLon").value.split("\n");
+    
   
     // Fetch or create a new reading list.
     let myReadingList;
@@ -184,86 +190,6 @@ import {
       labelCreateStatus.setAttribute("role", "alert");
     }
   }
-
-  
-
-
-
-  // 4. Create a new tank
-  async function createNewTank() {
-
-    let SELECTED_POD_TEMP = document.getElementById("select-pod").value;
-
-    labelCreateStatus.textContent = "";
-    let TANK_NAME = document.getElementById("tank-name").value;
-    let tankManager = document.getElementById("tank-manager").value.split("\n");
-    let tankViewers = document.getElementById("tank-viewers").value.split("\n");
-    
-    
-    const createTankUrl = `${SELECTED_POD_TEMP}dosing-data/${TANK_NAME}`;
-  
-    // Fetch or create a new reading list.
-    let myTanks;
-  
-    try {
-      // Attempt to retrieve the reading list in case it already exists.
-      myTanks = await getSolidDataset(createTankUrl, { fetch: fetch });
-      // Clear the list to override the whole list
-      let items = getThingAll(myTanks);
-      items.forEach((item) => {
-        myTanks = removeThing(myTanks, item);
-      });
-    } catch (error) {
-      if (typeof error.statusCode === "number" && error.statusCode === 404) {
-        // if not found, create a new SolidDataset (i.e., the reading list)
-        myTanks = createSolidDataset();
-      } else {
-        console.error(error.message);
-      }
-    }
-
-
-
-    const date = new Date();
-    console.log(date);
-
-    let item = createThing({ name: TANK_NAME });
-    item = addUrl(item, RDF.type, 'http://www.w3.org/ns/sosa/Sensor');
-    item = addStringNoLocale(item, SCHEMA_INRUPT.value, tankManager);
-    item = addStringNoLocale(item, SCHEMA_INRUPT.dateModified, date);
-    myTanks = setThing(myTanks, item);
-
-
-    try {
-      // Save the SolidDataset
-      let savedReadingList = await saveSolidDatasetAt(
-        createTankUrl,
-        myTanks,
-        { fetch: fetch }
-      );
-  
-      labelCreateStatus.textContent = "Saved";
-  
-      // Refetch the Reading List
-      savedReadingList = await getSolidDataset(createTankUrl, { fetch: fetch });
-  
-      let items = getThingAll(savedReadingList);
-  
-      let listcontent = "";
-      for (let i = 0; i < items.length; i++) {
-        let item = getStringNoLocale(items[i], SCHEMA_INRUPT.name);
-        if (item !== null) {
-          listcontent += item + "\n";
-        }
-      }
-  
-      document.getElementById("savedtitles").value = listcontent;
-    } catch (error) {
-      console.log(error);
-      labelCreateStatus.textContent = "Error" + error;
-      labelCreateStatus.setAttribute("role", "alert");
-    }
-  }
   
   buttonLogin.onclick = function () {
     loginToSelectedIdP();
@@ -277,10 +203,6 @@ import {
     createList();
   };
   
-  buttonCreateNewTank.onclick = function () {
-    console.log("New Tank Button Pressed");
-    createNewTank();
-  };
   
   selectorIdP.addEventListener("change", idpSelectionHandler);
   function idpSelectionHandler() {
