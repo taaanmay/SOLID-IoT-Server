@@ -16,6 +16,7 @@ import {
     getSolidDataset,
     getThingAll,
     getStringNoLocale,
+    getUrl,
     removeThing,
     saveSolidDatasetAt,
     setThing
@@ -128,6 +129,7 @@ import {
     item = addStringNoLocale(item, SCHEMA_INRUPT.value, temps);
     item = addStringNoLocale(item, SCHEMA_INRUPT.dateModified, time);
     item = addStringNoLocale(item, 'http://www.w3.org/2003/01/geo/wgs84_pos/lat_lon', latLon);
+    item = addStringNoLocale(item,'https://schema.org/creator', session.info.webId);
     myReadingList = setThing(myReadingList, item);
 
   
@@ -166,6 +168,7 @@ import {
   
       // Refetch the Reading List
       savedReadingList = await getSolidDataset(readingListUrl, { fetch: fetch });
+      console.log(savedReadingList);
   
       let items = getThingAll(savedReadingList);
   
@@ -246,17 +249,48 @@ import {
   
       // Refetch the Reading List
       savedReadingList = await getSolidDataset(createTankUrl, { fetch: fetch });
+      console.log(savedReadingList);
   
       let items = getThingAll(savedReadingList);
   
       let listcontent = "";
       for (let i = 0; i < items.length; i++) {
-        let item = getStringNoLocale(items[i], SCHEMA_INRUPT.name);
+       
+       // Access Name from SOLID Pods
+        let item = getStringNoLocale(items[i], SCHEMA_INRUPT.value);
+        console.log("Name = "+item);
         if (item !== null) {
           listcontent += item + "\n";
+          //document.getElementById("name").value = item;
+
+          const nameField = document.querySelector('#name');
+          nameField.innerHTML = item;
         }
+
+        // Access Date Modified from SOLID Pods
+        let dateModifiedData = getStringNoLocale(items[i], SCHEMA_INRUPT.dateModified);
+        console.log("Date Modified = "+dateModifiedData);
+        if (dateModifiedData !== null) {
+          listcontent += dateModifiedData + "\n";
+          const dateModifiedField = document.querySelector('#dateModified');
+          dateModifiedField.innerHTML = dateModifiedData;
+        }
+
+        // Access Type from SOLID Pods
+        let typeData = getUrl(items[i], RDF.type);
+        console.log("Date Modified = "+typeData);
+        if (typeData !== null) {
+          listcontent += typeData + "\n";
+          const typeField = document.querySelector('#type');
+          typeField.innerHTML = typeData;
+        }
+
+
+
+
       }
   
+      console.log("List Content = "+listcontent);
       document.getElementById("savedtitles").value = listcontent;
     } catch (error) {
       console.log(error);
