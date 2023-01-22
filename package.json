@@ -13,6 +13,7 @@
   "dependencies": {
     "@inrupt/solid-client": "^1.23.3",
     "@inrupt/solid-client-authn-browser": "^1.12.3",
+    "@inrupt/solid-client-notifications": "^1.1.1",
     "@inrupt/vocab-common-rdf": "^1.0.5",
     "@inrupt/vocab-solid": "^1.0.4",
     "buffer": "^6.0.3"

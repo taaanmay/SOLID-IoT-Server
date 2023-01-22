@@ -22,7 +22,16 @@ import {
     setThing
   } from "@inrupt/solid-client";
   
-  import { SCHEMA_INRUPT, RDF, AS, OWL, OM, GEO } from "@inrupt/vocab-common-rdf";
+import { SCHEMA_INRUPT, RDF, AS, OWL, OM, GEO } from "@inrupt/vocab-common-rdf";
+
+import {
+  WebsocketNotification,
+} from "@inrupt/solid-client-notifications";
+
+const containerUrl = "https://storage.inrupt.com/dcc8eac4-6003-4709-b4e1-cced55a20ac3/dosing-data/Tanker1233";
+
+// ... authentication logic has been omitted
+
   
   const selectorIdP = document.querySelector("#select-idp");
   const selectorPod = document.querySelector("#select-pod");
@@ -288,10 +297,22 @@ import {
 
 
 
+
       }
   
       console.log("List Content = "+listcontent);
       document.getElementById("savedtitles").value = listcontent;
+
+
+
+      const websocket = new WebsocketNotification(
+        containerUrl,
+        { fetch: fetch }
+      );
+      
+      websocket.on("message", console.log);
+      
+      websocket.connect();
     } catch (error) {
       console.log(error);
       labelCreateStatus.textContent = "Error" + error;
@@ -333,3 +354,7 @@ import {
       buttonCreate.removeAttribute("disabled");
     }
   }
+
+  
+
+
