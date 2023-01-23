@@ -1,31 +1,24 @@
 {
-  "name": "solid-iot-app",
+  "name": "dev",
   "version": "1.0.0",
-  "description": "Application developed by Tanmay Kaushik (kaushikt@tcd.ie) using SOLID Project.",
+  "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack",
-    "start": "webpack serve --open"
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Tanmay Kaushik",
+  "author": "",
   "license": "ISC",
   "dependencies": {
-    "@inrupt/solid-client": "^1.23.3",
-    "@inrupt/solid-client-authn-browser": "^1.12.3",
+    "@inrupt/solid-client": "^1.24.0",
+    "@inrupt/solid-client-authn-browser": "^1.13.0",
+    "@inrupt/solid-client-authn-node": "^1.13.0",
     "@inrupt/solid-client-notifications": "^1.1.1",
     "@inrupt/vocab-common-rdf": "^1.0.5",
-    "@inrupt/vocab-solid": "^1.0.4",
-    "buffer": "^6.0.3",
-    "express": "^4.18.2",
-    "node-polyfill-webpack-plugin": "^2.0.1",
+    "cookie-session": "^2.0.0",
+    "express": "~4.16.1",
+    "fs": "^0.0.1-security",
+    "jsdom": "^21.1.0",
     "path": "^0.12.7"
-  },
-  "devDependencies": {
-    "css-loader": "^6.7.3",
-    "style-loader": "^3.3.1",
-    "webpack": "^5.75.0",
-    "webpack-cli": "^5.0.1",
-    "webpack-dev-server": "^4.11.1"
   }
 }
