@@ -102,6 +102,29 @@ app.get("/logout", async (req, res, next) => {
   res.send(`<p>Logged out.</p>`);
 });
 
+
+app.use(express.json());
+
+app.post("/post/add-device", async (req, res) => {
+  if (req.headers["content-type"] !== "application/json") {
+    return res.status(400).send({ error: "Content-type must be JSON" });
+  }
+
+  const deviceData = req.body;
+  const { id, temperature, latitude, longitude } = deviceData;
+
+  console.log(`id: ${id}`);
+  console.log(`temperature: ${temperature}`);
+  console.log(`latitude: ${latitude}`);
+  console.log(`longitude: ${longitude}`);
+
+  res.send({ success: true, message: "Data received by Server (TK)." });
+
+  podLocation = `https://storage.inrupt.com/dcc8eac4-6003-4709-b4e1-cced55a20ac3/dosing-data/`
+  addDevice(podLocation, id, temperature, latitude, longitude);
+});
+
+
 // 8. On the server side, you can also list all registered sessions using the
 //    getSessionIdFromStorageAll function.
 app.get("/", async (req, res, next) => {
@@ -146,4 +169,10 @@ function runHTML(){
         //createNewTank();
       };
 
+}
+
+
+function addDevice(podLocation, id, temperature, latitude, longitude){
+    console.log("Add Device Function called");
+    
 }
