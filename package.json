@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@inrupt/solid-client": "^1.24.0",
+    "@inrupt/solid-client": "^1.25.2",
     "@inrupt/solid-client-authn-browser": "^1.13.0",
     "@inrupt/solid-client-authn-node": "^1.13.0",
     "@inrupt/solid-client-notifications": "^1.1.1",
