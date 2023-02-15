@@ -30,6 +30,8 @@ const {
   removeThing,
   saveSolidDatasetAt,
   setThing,
+  getAgentAccess,
+  getAgentAccessAll,
 } = require("@inrupt/solid-client");
 
 const {
@@ -269,6 +271,20 @@ app.use(
         if (session.info.isLoggedIn) {
           var responseFromSolid = await (await session.fetch(req.query["resource"])).text();
           console.log(responseFromSolid);
+
+          const myDataset = await getSolidDataset(
+            req.query["resource"], 
+            { fetch: session.fetch }
+          );
+          // const myDataset = await getSolidDataset(
+          //   req.query["resource"]
+          // );
+          console.log(`Dataset = ${myDataset}`);
+
+          // console.log("Resource = "+req.query["resource"]);
+          // let access = await getAgentAccessAll(req.query["resource"]);
+          // console.log("Access = "+access);
+
           res.send("<p>Performed authenticated fetch.</p>" + responseFromSolid);
         }
       });
@@ -321,7 +337,8 @@ app.use(
       // podLocation = `https://storage.inrupt.com/dcc8eac4-6003-4709-b4e1-cced55a20ac3/dosing-data/`
       
       
-      var podLocation = "https://storage.inrupt.com/fc07b31b-5d6d-49cd-9ef2-df45bbaf43a0/";
+      var podLocation = "https://storage.inrupt.com/fc07b31b-5d6d-49cd-9ef2-df45bbaf43a0/dosing-data/";
+  
       var status  = await (addDevice(podLocation, id, temperature, latitude, longitude));
       if(status == true){
         res.send({ success: true, message: "Data Uploaded." });
@@ -400,11 +417,13 @@ app.use(
           if (session.info.isLoggedIn) {
             console.log(`WebID = ${session.info.webId}`);
             
+            
             let deviceList;
             
             try {
               // Attempt to retrieve the reading list in case it already exists.
-              deviceList = await getSolidDataset(podLocation);
+              deviceList = await getSolidDataset(podLocation, 
+                { fetch: session.fetch });
               // Clear the list to override the whole list
               let items = getThingAll(deviceList);
               items.forEach((item) => {
@@ -421,30 +440,49 @@ app.use(
             
             
             let item = createThing({
-              name: "Doser"
+              name: "Tank"+id
             });
             item = addUrl(item, RDF.type, 'http://www.w3.org/ns/sosa/Sensor');
-            // item = addStringNoLocale(item, SCHEMA_INRUPT.value, temperature);
-            // // item = addStringNoLocale(item, SCHEMA_INRUPT.dateModified, time);
-            // item = addStringNoLocale(item, 'http://www.w3.org/2003/01/geo/wgs84_pos/lat_lon', (latitude + ", " + longitude));
-            // item = addStringNoLocale(item, 'https://schema.org/creator', session.info.webId);
-            // deviceList = setThing(deviceList, item);
+            item = addStringNoLocale(item, SCHEMA_INRUPT.value, temperature);
+            // item = addStringNoLocale(item, SCHEMA_INRUPT.dateModified, time);
+            item = addStringNoLocale(item, 'http://www.w3.org/2003/01/geo/wgs84_pos/lat_lon', (latitude + ", " + longitude));
+            item = addStringNoLocale(item, 'https://schema.org/creator', session.info.webId);
+            deviceList = setThing(deviceList, item);
             
             
             try {
               // Save the SolidDataset
               let savedReadingList = await saveSolidDatasetAt(
                 podLocation,
-                deviceList
+                deviceList, 
+                { fetch: session.fetch }
                 );
+              console.log('DONE '+ savedReadingList);  
                 
-              return true;  
+              
               } catch (error) {
                 console.log("Device Not saved in Solid Pod => ");
                 console.error(error.message);
-                return false;
+                
 
               }
+
+
+              // Refetch the Reading List
+      deviceList = await getSolidDataset(podLocation, { fetch: session.fetch });
+      console.log(deviceList);
+  
+      let items = getThingAll(deviceList);
+  
+      let listcontent = "";
+      for (let i = 0; i < items.length; i++) {
+        let item = getStringNoLocale(items[i], SCHEMA_INRUPT.name);
+        if (item !== null) {
+          listcontent += item + "\n";
+        }
+      }
+
+      console.log("List Items = "+listcontent);
               
             }
           });
