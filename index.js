@@ -97,16 +97,29 @@ app.use(express.json());
             id,
             temperature,
             latitude,
-            longitude
+            longitude,
+            webID
         } = deviceData;
         
         console.log(`id: ${id}`);
         console.log(`temperature: ${temperature}`);
         console.log(`latitude: ${latitude}`);
         console.log(`longitude: ${longitude}`);
+        console.log(`webID: ${webID}`);
+
+
+        // var webIdResponse = await (await session.fetch(webID));
+        // // let path = webIdResponse.getRef("http://www.w3.org/ns/pim/space#storage");
+        // const profileDataset = await getSolidDataset(webID, { fetch: session.fetch })
+
+        const profileDataset = await getSolidDataset(webID, { fetch: session.fetch });
+        const profileThing = getThing(profileDataset, webID);
+        const incomingPodUrl = getUrlAll(profileThing, "http://www.w3.org/ns/pim/space#storage");
+        console.log('WebID Storage Path-> '+ incomingPodUrl);
     
         // Hardcoded SOLID Pod Location
-        var podLocation = "https://storage.inrupt.com/fc07b31b-5d6d-49cd-9ef2-df45bbaf43a0/dosing-data/";
+        // var podLocation = "https://storage.inrupt.com/fc07b31b-5d6d-49cd-9ef2-df45bbaf43a0/dosing-data/";
+        var podLocation = incomingPodUrl+`dosing-data/`;
         
         var status  = await (addDevice(podLocation, id, temperature, latitude, longitude));
         if(status == true){
@@ -132,7 +145,7 @@ app.use(express.json());
                 // Clear the list to override the whole list
                 let items = getThingAll(deviceList);
                 items.forEach((item) => {
-                    deviceList = removeThing(deviceList, item);
+                    // deviceList = removeThing(deviceList, item);
                 });
             } catch (error) {
                 if (typeof error.statusCode === "number" && error.statusCode === 404) {
@@ -145,9 +158,9 @@ app.use(express.json());
             }
                 
                 var currentdate = new Date(); 
-                var datetime = "Last Sync: " + currentdate.getDate() + "/"
+                var datetime = currentdate.getDate() + "/"
                                 + (currentdate.getMonth()+1)  + "/" 
-                                + currentdate.getFullYear() + " @ "  
+                                + currentdate.getFullYear() + " "  
                                 + currentdate.getHours() + ":"  
                                 + currentdate.getMinutes() + ":" 
                                 + currentdate.getSeconds();
@@ -155,8 +168,10 @@ app.use(express.json());
                 console.log("Date - "+datetime);                                
                 
                 let item = createThing({
-                name: "Tank"+id
+                name: "Device"+id
                 });
+                item = addStringNoLocale(item, SCHEMA_INRUPT.identifier, id);
+                item = addStringNoLocale(item, SCHEMA_INRUPT.name, "Device-"+id);
                 item = addUrl(item, RDF.type, 'http://www.w3.org/ns/sosa/Sensor');
                 item = addStringNoLocale(item, SCHEMA_INRUPT.value, temperature);
                 item = addStringNoLocale(item, SCHEMA_INRUPT.dateModified, datetime);
@@ -193,6 +208,128 @@ app.use(express.json());
     }    
     
 
+     // 4. Create a new tank
+  async function createNewTank() {
+
+    let SELECTED_POD_TEMP = "https://storage.inrupt.com/fc07b31b-5d6d-49cd-9ef2-df45bbaf43a0/dosing-data/";
+
+    
+    
+    
+    
+    const createTankUrl = `${SELECTED_POD_TEMP}dosing-data/${TANK_NAME}`;
+  
+    // Fetch or create a new reading list.
+    let myTanks;
+  
+    try {
+      // Attempt to retrieve the reading list in case it already exists.
+      myTanks = await getSolidDataset(createTankUrl, { fetch: fetch });
+      // Clear the list to override the whole list
+      let items = getThingAll(myTanks);
+      items.forEach((item) => {
+        myTanks = removeThing(myTanks, item);
+      });
+    } catch (error) {
+      if (typeof error.statusCode === "number" && error.statusCode === 404) {
+        // if not found, create a new SolidDataset (i.e., the reading list)
+        myTanks = createSolidDataset();
+      } else {
+        console.error(error.message);
+      }
+    }
+
+
+
+    const date = new Date();
+    console.log(date);
+
+    let item = createThing({ name: TANK_NAME });
+    item = addUrl(item, RDF.type, 'http://www.w3.org/ns/sosa/Sensor');
+    item = addStringNoLocale(item, SCHEMA_INRUPT.value, tankManager);
+    item = addStringNoLocale(item, SCHEMA_INRUPT.dateModified, date);
+    myTanks = setThing(myTanks, item);
+
+
+    try {
+      // Save the SolidDataset
+      let savedReadingList = await saveSolidDatasetAt(
+        createTankUrl,
+        myTanks,
+        { fetch: fetch }
+      );
+  
+      labelCreateStatus.textContent = "Saved";
+  
+      // Refetch the Reading List
+      savedReadingList = await getSolidDataset(createTankUrl, { fetch: fetch });
+      console.log(savedReadingList);
+  
+      let items = getThingAll(savedReadingList);
+  
+      let listcontent = "";
+      for (let i = 0; i < items.length; i++) {
+       
+       // Access Name from SOLID Pods
+        let item = getStringNoLocale(items[i], SCHEMA_INRUPT.value);
+        console.log("Name = "+item);
+        if (item !== null) {
+          listcontent += item + "\n";
+          //document.getElementById("name").value = item;
+
+          const nameField = document.querySelector('#name');
+          nameField.innerHTML = item;
+        }
+
+        // Access Date Modified from SOLID Pods
+        let dateModifiedData = getStringNoLocale(items[i], SCHEMA_INRUPT.dateModified);
+        console.log("Date Modified = "+dateModifiedData);
+        if (dateModifiedData !== null) {
+          listcontent += dateModifiedData + "\n";
+          const dateModifiedField = document.querySelector('#dateModified');
+          dateModifiedField.innerHTML = dateModifiedData;
+        }
+
+        // Access Type from SOLID Pods
+        let typeData = getUrl(items[i], RDF.type);
+        console.log("Date Modified = "+typeData);
+        if (typeData !== null) {
+          listcontent += typeData + "\n";
+          const typeField = document.querySelector('#type');
+          typeField.innerHTML = typeData;
+        }
+        
+      }
+      
+      console.log("List Content = "+listcontent);
+      document.getElementById("savedtitles").value = listcontent;
+
+
+      const session = getDefaultSession();
+
+      // Trying Access
+      var webID = `https://id.inrupt.com/iotserver01`; // Web ID of server
+      // var webID = `https://id.inrupt.com/doser001`;
+      lookupAccess(`https://storage.inrupt.com/dcc8eac4-6003-4709-b4e1-cced55a20ac3/dosing-data/`, webID, session );
+
+      giveAccessToServer(`https://storage.inrupt.com/dcc8eac4-6003-4709-b4e1-cced55a20ac3/dosing-data/`);
+
+      lookupAccess(`https://storage.inrupt.com/dcc8eac4-6003-4709-b4e1-cced55a20ac3/dosing-data/`, webID, session );
+
+      const websocket = new WebsocketNotification(
+        containerUrl,
+        { fetch: fetch }
+      );
+      
+      websocket.on("message", console.log);
+      
+      websocket.connect();
+    } catch (error) {
+      console.log(error);
+      labelCreateStatus.textContent = "Error" + error;
+      labelCreateStatus.setAttribute("role", "alert");
+    }
+  }
 
     app.listen(port, () => {
         console.log(
