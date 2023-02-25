@@ -316,14 +316,7 @@ app.use(express.json());
 
       lookupAccess(`https://storage.inrupt.com/dcc8eac4-6003-4709-b4e1-cced55a20ac3/dosing-data/`, webID, session );
 
-      const websocket = new WebsocketNotification(
-        containerUrl,
-        { fetch: fetch }
-      );
       
-      websocket.on("message", console.log);
-      
-      websocket.connect();
     } catch (error) {
       console.log(error);
       labelCreateStatus.textContent = "Error" + error;
