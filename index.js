@@ -95,25 +95,29 @@ app.use(express.json());
         const deviceData = req.body;
         const {
             id,
-            temperature,
+            value,
             latitude,
             longitude,
             webID
         } = deviceData;
         
         console.log(`id: ${id}`);
-        console.log(`temperature: ${temperature}`);
+        console.log(`value: ${value}`);
         console.log(`latitude: ${latitude}`);
         console.log(`longitude: ${longitude}`);
         console.log(`webID: ${webID}`);
+        var creatorWebId = webID;
 
 
-        // var webIdResponse = await (await session.fetch(webID));
+        var webIdResponse = await (session.fetch(webID));
+        console.log(`WebID Response ${webIdResponse}`);
         // // let path = webIdResponse.getRef("http://www.w3.org/ns/pim/space#storage");
         // const profileDataset = await getSolidDataset(webID, { fetch: session.fetch })
 
         const profileDataset = await getSolidDataset(webID, { fetch: session.fetch });
+        console.log(profileDataset);
         const profileThing = getThing(profileDataset, webID);
+        console.log(profileThing);
         const incomingPodUrl = getUrlAll(profileThing, "http://www.w3.org/ns/pim/space#storage");
         console.log('WebID Storage Path-> '+ incomingPodUrl);
     
@@ -121,16 +125,17 @@ app.use(express.json());
         // var podLocation = "https://storage.inrupt.com/fc07b31b-5d6d-49cd-9ef2-df45bbaf43a0/dosing-data/";
         var podLocation = incomingPodUrl+`dosing-data/`;
         
-        var status  = await (addDevice(podLocation, id, temperature, latitude, longitude));
-        if(status == true){
-            res.send({ success: true, message: "Data Uploaded." });
+
+        var status  = await (addDevice(podLocation, id, value, latitude, longitude, creatorWebId));
+        if(status.success == true){
+            res.send({ success: true, message: status.message });
         }else{
-            res.send({ success: false, message: "Data Was Not uploaded." });
+          res.status(400).send({ success: false, message: status.message });
         } 
     
     });
 
-    async function addDevice(podLocation, id, temperature, latitude, longitude){
+    async function addDevice(podLocation, id, value, latitude, longitude, creatorWebId){
 
         if (session.info.isLoggedIn) {
             console.log(`WebID = ${session.info.webId}`);
@@ -139,13 +144,18 @@ app.use(express.json());
             let deviceList;
             
             try {
+              var doesDeviceExist = false;
                 // Attempt to retrieve the reading list in case it already exists.
                 deviceList = await getSolidDataset(podLocation, 
                 { fetch: session.fetch });
                 // Clear the list to override the whole list
                 let items = getThingAll(deviceList);
                 items.forEach((item) => {
-                    // deviceList = removeThing(deviceList, item);
+                    if(getStringNoLocale(item,SCHEMA_INRUPT.identifier) == id){
+                        console.log("DEVICE EXISTS");
+                        doesDeviceExist = true;
+                        
+                    }
                 });
             } catch (error) {
                 if (typeof error.statusCode === "number" && error.statusCode === 404) {
@@ -154,8 +164,11 @@ app.use(express.json());
                 } 
                 else {
                     console.error(error.message);
+                    return {success: false, message:"Encountered Issue while creating/modifying data in SOLID Pods"};
                 }
             }
+            // If Device exists in user's SOLID Pod, only then the Data will be updated
+            if(doesDeviceExist == true){
                 
                 var currentdate = new Date(); 
                 var datetime = currentdate.getDate() + "/"
@@ -170,13 +183,15 @@ app.use(express.json());
                 let item = createThing({
                 name: "Device"+id
                 });
+
+                // Server will only take in ID, Name, Value, Date Modified, Lat/Long, Creator
                 item = addStringNoLocale(item, SCHEMA_INRUPT.identifier, id);
                 item = addStringNoLocale(item, SCHEMA_INRUPT.name, "Device-"+id);
-                item = addUrl(item, RDF.type, 'http://www.w3.org/ns/sosa/Sensor');
-                item = addStringNoLocale(item, SCHEMA_INRUPT.value, temperature);
+                // item = addUrl(item, RDF.type, 'http://www.w3.org/ns/sosa/Sensor');
+                item = addStringNoLocale(item, SCHEMA_INRUPT.value, value);
                 item = addStringNoLocale(item, SCHEMA_INRUPT.dateModified, datetime);
                 item = addStringNoLocale(item, 'http://www.w3.org/2003/01/geo/wgs84_pos/lat_lon', (latitude + ", " + longitude));
-                item = addStringNoLocale(item, 'https://schema.org/creator', session.info.webId);
+                item = addStringNoLocale(item, 'https://schema.org/creator', creatorWebId);
                 deviceList = setThing(deviceList, item);
                 
                 
@@ -188,21 +203,21 @@ app.use(express.json());
                     { fetch: session.fetch }
                     );
                     console.log('Saved Data '+ saveDeviceList); 
-                    return true; 
+                    return {success: true, message:`Data Stored for Device: ${id}`}; 
                     
                     
                 } catch (error) {
                     console.log("Device Not saved in Solid Pod => ");
-                    console.error(error.message);
-                    res.status(400).send({
-                        error: "Device Data could not be saved in Solid Pod"
-                    });
-                    return false;
+                    console.error(error.message);                    
+                    return {success: false, message: "Device Data could not be saved in Solid Pod. Error: "+error.message}; 
 
                     
                 }
                 
-                
+              }else{
+                    console.log("Device with this ID does not exist ");                                        
+                    return {success: false, message: `Device with ID: ${id} does not exist`};
+              } 
                 
         }
     }    
