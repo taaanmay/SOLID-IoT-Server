@@ -137,10 +137,12 @@ app.use(express.json());
 
     async function addDevice(podLocation, id, value, latitude, longitude, creatorWebId){
 
+
+      let name;
         if (session.info.isLoggedIn) {
             console.log(`WebID = ${session.info.webId}`);
             
-            
+            let name;
             let deviceList;
             
             try {
@@ -153,6 +155,8 @@ app.use(express.json());
                 items.forEach((item) => {
                     if(getStringNoLocale(item,SCHEMA_INRUPT.identifier) == id){
                         console.log("DEVICE EXISTS");
+                        name = getStringNoLocale(item,SCHEMA_INRUPT.name);
+
                         doesDeviceExist = true;
                         
                     }
@@ -180,13 +184,28 @@ app.use(express.json());
                 
                 console.log("Date - "+datetime);                                
                 
-                let item = createThing({
-                name: "Device"+id
-                });
+                let item;
+
+                console.log("Name"+name);
+                if(name!= null || name!=""){
+                  item = createThing({
+                    name: name
+                    });
+                }else{
+                  item = createThing({
+                    name: "Device"+id
+                    });
+                }
+                
 
                 // Server will only take in ID, Name, Value, Date Modified, Lat/Long, Creator
                 item = addStringNoLocale(item, SCHEMA_INRUPT.identifier, id);
-                item = addStringNoLocale(item, SCHEMA_INRUPT.name, "Device-"+id);
+                if(name!= null || name!=""){
+                  item = addStringNoLocale(item, SCHEMA_INRUPT.name, name);
+                }else{
+                  item = addStringNoLocale(item, SCHEMA_INRUPT.name, "Device"+id);
+                }
+                
                 // item = addUrl(item, RDF.type, 'http://www.w3.org/ns/sosa/Sensor');
                 item = addStringNoLocale(item, SCHEMA_INRUPT.value, value);
                 item = addStringNoLocale(item, SCHEMA_INRUPT.dateModified, datetime);
