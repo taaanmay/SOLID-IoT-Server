@@ -138,11 +138,14 @@ app.use(express.json());
     async function addDevice(podLocation, id, value, latitude, longitude, creatorWebId){
 
 
-      let name;
+      
         if (session.info.isLoggedIn) {
             console.log(`WebID = ${session.info.webId}`);
             
-            let name;
+            let deviceName;
+            let managerOfDevice;
+            let viewerOfDevice;
+            let deviceType;
             let deviceList;
             
             try {
@@ -155,7 +158,10 @@ app.use(express.json());
                 items.forEach((item) => {
                     if(getStringNoLocale(item,SCHEMA_INRUPT.identifier) == id){
                         console.log("DEVICE EXISTS");
-                        name = getStringNoLocale(item,SCHEMA_INRUPT.name);
+                        deviceName = getStringNoLocale(item,SCHEMA_INRUPT.name);
+                        managerOfDevice = getStringNoLocale(item, 'https://schema.org/creator');
+                        viewerOfDevice = getStringNoLocale(item, 'https://schema.org/viewer');
+                        deviceType = getStringNoLocale(item, RDF.type);
 
                         doesDeviceExist = true;
                         
@@ -182,35 +188,29 @@ app.use(express.json());
                                 + currentdate.getMinutes() + ":" 
                                 + currentdate.getSeconds();
                 
-                console.log("Date - "+datetime);                                
+                //console.log("Date - "+datetime);                                
                 
                 let item;
 
-                console.log("Name"+name);
-                if(name!= null || name!=""){
-                  item = createThing({
-                    name: name
-                    });
-                }else{
-                  item = createThing({
-                    name: "Device"+id
-                    });
-                }
+                console.log("Name of Device: "+deviceName);
+                item = createThing({
+                  name: "Device"+id
+                });
                 
-
                 // Server will only take in ID, Name, Value, Date Modified, Lat/Long, Creator
                 item = addStringNoLocale(item, SCHEMA_INRUPT.identifier, id);
-                if(name!= null || name!=""){
-                  item = addStringNoLocale(item, SCHEMA_INRUPT.name, name);
+                if(deviceName!= null && deviceName!="" && deviceName.length !=0){
+                  item = addStringNoLocale(item, SCHEMA_INRUPT.name, deviceName);
                 }else{
                   item = addStringNoLocale(item, SCHEMA_INRUPT.name, "Device"+id);
                 }
                 
-                // item = addUrl(item, RDF.type, 'http://www.w3.org/ns/sosa/Sensor');
                 item = addStringNoLocale(item, SCHEMA_INRUPT.value, value);
                 item = addStringNoLocale(item, SCHEMA_INRUPT.dateModified, datetime);
                 item = addStringNoLocale(item, 'http://www.w3.org/2003/01/geo/wgs84_pos/lat_lon', (latitude + ", " + longitude));
-                item = addStringNoLocale(item, 'https://schema.org/creator', creatorWebId);
+                item = addStringNoLocale(item, 'https://schema.org/creator', managerOfDevice);
+                item = addStringNoLocale(item, 'https://schema.org/viewer', viewerOfDevice);
+                item = addStringNoLocale(item, RDF.type, deviceType);
                 deviceList = setThing(deviceList, item);
                 
                 
